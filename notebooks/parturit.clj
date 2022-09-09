@@ -1,0 +1,111 @@
+^{:nextjournal.clerk/visibility #{:hide-ns}}
+(ns parturit
+  (:require [clojure.string :as str]
+            [nextjournal.clerk :as clerk]
+            [clj-http.client :as client]
+            [jsonista.core :as json]))
+
+;; # Parturikampaamojen määrä Suomen kunnissa
+
+;; Kävin kesälomalla Saarijärvellä, ja ihmettelin kun joka käänteessä tuli vastaan parturi-kampaamoja.
+;; Päätin selvittää Tilastokeskuksen avoimen datan pohjalta onko Saarijärvellä tosiaan paljon
+;; kampaamoja asukasta kohti, verrattuna muihin Suomen kuntiin.
+
+;; Ensin määritellään atomi, johon haemme Suomen kuntien väkiluvut. Teen tästä globaalin tietorakenteen,
+;; koska tulen ehkä tekemään muitakin kuntakohtaisia vertailuja, ja näin kunnat ja väkiluvut tarvitsee
+;; hakea vain kerran.
+
+(def vakiluvut (atom {}))
+
+(defn prettyname [rawname]
+  (peek (re-find #"^\d+ +(.+)$" rawname)))
+
+(defn get-vakiluvut []
+  (let [apiurl "https://pxnet2.stat.fi:443/PXWeb/api/v1/fi/Kuntien_avainluvut/2021/kuntien_avainluvut_2021_viimeisin.px"
+        api-input {:query [{:code "Alue 2021"
+                            :selection {:filter "all"
+                                        :values ["*"]}}
+                           {:code "Tiedot"
+                            :selection {:filter "item"
+                                        :values ["M411"]}}]
+                   :response {:format "json-stat2"}}
+        result (client/post apiurl {:body (json/write-value-as-string api-input)})
+        result-edn (json/read-value  (:body result) json/keyword-keys-object-mapper)
+        indeksit (get-in result-edn [:dimension (keyword "Alue 2021") :category :index])
+        labels (get-in result-edn [:dimension (keyword "Alue 2021") :category :label])
+        value (:value result-edn)]
+    (doseq [kunta labels]
+      (swap! vakiluvut assoc (val kunta) (get value (get indeksit (key kunta)))))))
+
+(get-vakiluvut)
+
+;; Sitten haemme parturikampaamojen määrän kunnittain
+
+(defn get-parturit-kunnat []
+  (let [apiurl "https://pxnet2.stat.fi:443/PXWeb/api/v1/fi/Toimipaikkalaskuri/Toimipaikkalaskuri/tmp_lkm_kunta.px"
+        api-input {:query [{:code "Kunta"
+                            :selection {:filter "all"
+                                        :values ["*"]}}
+                           {:code "Toimiala2008"
+                            :selection {:filter "item"
+                                        :values ["96021"]}}
+                           {:code "Henkilöstön suuruusluokka"
+                            :selection {:filter "item"
+                                        :values ["_19"]}}]
+                   :response {:format "json-stat2"}}
+        input2 (json/write-value-as-string api-input)
+        result (client/post apiurl {:body input2})
+        result-edn (json/read-value  (:body result) json/keyword-keys-object-mapper)
+        indeksit (get-in result-edn [:dimension :Kunta :category :index])
+        labels (get-in result-edn [:dimension :Kunta :category :label])
+        value (:value result-edn)]
+    (for [kunta labels
+          :let [bettername (prettyname (val kunta))
+                parturit (get value (get indeksit (key kunta)) 0)
+                vakiluku  (get @vakiluvut bettername 0)]
+          :when (and (string? bettername) (pos-int? parturit) (pos-int? vakiluku))]
+      {:kunta (str/trim bettername)
+       :partureita parturit
+       :vakiluku vakiluku
+       :suhde (if (every? #(and (number? %) (pos? %))  [parturit vakiluku])
+                (int (float (/ vakiluku parturit)))
+                0)})))
+
+(def parturit   (get-parturit-kunnat))
+
+;; Kymmenen kärki parturikampaamojen määrässä kuntalaista kohti
+(clerk/table (->> parturit
+                  (sort-by :suhde)
+                  (take 10)))
+
+;; Ja 10 kuntaa joissa asiat ovat huonoiten
+(clerk/table (->> parturit
+                  (sort-by :suhde)
+                  (take-last 10)))
+
+;; Saarijärvi ei ole parturitiheyden suhteen ollenkaan erikoinen!
+(first (filter #(= "Saarijärvi" (:kunta %)) parturit))
+
+;; Suhdeluvun mukaan väritetty kuntakartta, josta näkee , että Länsi-Suomessa hiuksista huolehditaan paremmin.
+;; Valkoiset alueet tarkoittavat puuttuvaa tietoa. Käyttämäni kunta-raja -aineisto on vanhanpuoleinen eikä
+;; taida vastata aivan nykyistä kuntaliitosten jälkeistä tilannetta. Tilastokeskuksen ihmiset kommentoivat
+;; avuliaasti tätä visualisointia ja kertoivat, että Pohjois-Suomi näkyy turhan suurena, koska tässä on
+;; käytetty WGS84-koordinaatistoa, kun oikeampi järjestelmä olisi ETRS-TM35FIN. En ole vielä löytänyt
+;; parempaa aineistoa kuntarajoista.
+(clerk/vl {:width 400
+           :height 800
+           :data {:values (slurp "datasets/kunnat2.json")
+                  :format {:type "topojson" :feature "kunnat"}}
+           :transform [{:lookup "properties.name"
+                        :from {:data  {:values parturit}
+                               :key "kunta"
+                               :fields ["suhde" "partureita" "vakiluku"]}}]
+           :projection {:type "mercator" :center [25,65] :scale 1600}
+           :mark {:type "geoshape"}
+           :encoding {:tooltip [{:field "properties.name" :title "Kunta"}
+                                {:field "partureita" :title "Parturiliikkeitä"}
+                                {:field "vakiluku" :title "Väkiluku"}
+                                {:field "suhde" :title "Suhdeluku"}]
+                      :color {:field "suhde"
+                              :type "quantitative"}}})
+

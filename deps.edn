@@ -1,0 +1,22 @@
+{:paths ["src" "resources"]
+ :deps {org.clojure/clojure {:mvn/version "1.11.1"}
+        io.github.nextjournal/clerk {:mvn/version "0.10.550"}
+        clj-http/clj-http {:mvn/version "3.12.3"}
+        metosin/jsonista {:mvn/version "0.3.6"}}
+ :aliases
+ {:nextjournal/clerk
+  {:extra-paths ["datasets"]
+   :exec-fn nextjournal.clerk/build-static-app!
+   ;; notebooks to be built, accepts globs patterns
+   :exec-args {:bundle? false
+               :paths ["notebooks/parturit.clj"]}}
+  :run-m {:main-opts ["-m" "parturit"]}
+  :run-x {:ns-default parturit
+          :exec-fn greet
+          :exec-args {:name "Clojure"}}
+  :build {:deps {io.github.seancorfield/build-clj
+                 {:git/tag "v0.8.3" :git/sha "7ac1f8d"
+                  ;; since we're building an app uberjar, we do not
+                  ;; need deps-deploy for clojars.org deployment:
+                  :deps/root "slim"}}
+          :ns-default build}}}
