@@ -13,7 +13,7 @@ I wanted to try [Clerk notebooks](https://github.com/nextjournal/clerk
 
 ## Examples
 
-Take a look at a static rendering [here](docs/index.html)
+Take a look at a static rendering
 
 ### Thanks
 
