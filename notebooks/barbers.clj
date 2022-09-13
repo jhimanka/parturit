@@ -88,23 +88,19 @@
 (first (filter #(= "Saarijärvi" (:municipality %)) barbers))
 
 ;; Here's a map coloured according to the hairdresser density that shows us that in the west people tend to
-;; take better care of their hair. White areas mean missing data. The data I had of the municipality
-;; borders is a bit old and isn't quite up to date with fusions of municipalities. The people from
-;; Statistics Finland helpfully commented on this visualisation and told that Finland appears top-heavy
-;; because the coordinates used are WGS84 and not ETRS-TM35FIN which would be correct. I haven't yet
-;; located better data about the borders.
+;; take better care of their hair. White areas mean missing data. 
 
-(clerk/vl {:width 400
-           :height 800
-           :data {:values (slurp "datasets/kunnat2.json")
-                  :format {:type "topojson" :feature "kunnat"}}
-           :transform [{:lookup "properties.name"
+(clerk/vl {:width 600
+           :height 1000
+           :data {:values (slurp "datasets/kunnat2022.json")
+                  :format {:type "topojson" :feature "kunnat2022"}}
+           :transform [{:lookup "properties.nimi"
                         :from {:data  {:values barbers}
                                :key "municipality"
                                :fields ["proportion" "barbers" "population"]}}]
-           :projection {:type "mercator" :center [25,65] :scale 1600}
+           :projection {:type "mercator" :center [25,65] :scale 2000}
            :mark {:type "geoshape"}
-           :encoding {:tooltip [{:field "properties.name" :title "Municipality"}
+           :encoding {:tooltip [{:field "properties.nimi" :title "Municipality"}
                                 {:field "barbers" :title "Barbers"}
                                 {:field "population" :title "Population"}
                                 {:field "proportion" :title "Proportion"}]

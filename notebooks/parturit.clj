@@ -87,25 +87,21 @@
 (first (filter #(= "Saarijärvi" (:kunta %)) parturit))
 
 ;; Suhdeluvun mukaan väritetty kuntakartta, josta näkee , että Länsi-Suomessa hiuksista huolehditaan paremmin.
-;; Valkoiset alueet tarkoittavat puuttuvaa tietoa. Käyttämäni kunta-raja -aineisto on vanhanpuoleinen eikä
-;; taida vastata aivan nykyistä kuntaliitosten jälkeistä tilannetta. Tilastokeskuksen ihmiset kommentoivat
-;; avuliaasti tätä visualisointia ja kertoivat, että Pohjois-Suomi näkyy turhan suurena, koska tässä on
-;; käytetty WGS84-koordinaatistoa, kun oikeampi järjestelmä olisi ETRS-TM35FIN. En ole vielä löytänyt
-;; parempaa aineistoa kuntarajoista.
-(clerk/vl {:width 400
-           :height 800
-           :data {:values (slurp "datasets/kunnat2.json")
-                  :format {:type "topojson" :feature "kunnat"}}
-           :transform [{:lookup "properties.name"
+;; Valkoiset alueet tarkoittavat puuttuvaa tietoa.
+
+(clerk/vl {:width 600
+           :height 1000
+           :data {:values (slurp "datasets/kunnat2022.json")
+                  :format {:type "topojson" :feature "kunnat2022"}}
+           :transform [{:lookup "properties.nimi"
                         :from {:data  {:values parturit}
                                :key "kunta"
                                :fields ["suhde" "partureita" "vakiluku"]}}]
-           :projection {:type "mercator" :center [25,65] :scale 1600}
+           :projection {:type "mercator" :center [25,65] :scale 2000}
            :mark {:type "geoshape"}
-           :encoding {:tooltip [{:field "properties.name" :title "Kunta"}
+           :encoding {:tooltip [{:field "properties.nimi" :title "Kunta"}
                                 {:field "partureita" :title "Parturiliikkeitä"}
                                 {:field "vakiluku" :title "Väkiluku"}
                                 {:field "suhde" :title "Suhdeluku"}]
                       :color {:field "suhde"
                               :type "quantitative"}}})
-
