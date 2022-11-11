@@ -21,7 +21,7 @@
   (peek (re-find #"^\d+ +(.+)$" rawname)))
 
 (defn get-vakiluvut []
-  (let [apiurl "https://pxnet2.stat.fi:443/PXWeb/api/v1/fi/Kuntien_avainluvut/2021/kuntien_avainluvut_2021_viimeisin.px"
+  (let [apiurl "https://pxdata.stat.fi:443/PXWeb/api/v1/fi/Kuntien_avainluvut/2021/kuntien_avainluvut_2021_viimeisin.px"
         api-input {:query [{:code "Alue 2021"
                             :selection {:filter "all"
                                         :values ["*"]}}
@@ -42,7 +42,7 @@
 ;; Sitten haemme parturikampaamojen määrän kunnittain
 
 (defn get-parturit-kunnat []
-  (let [apiurl "https://pxnet2.stat.fi:443/PXWeb/api/v1/fi/Toimipaikkalaskuri/Toimipaikkalaskuri/tmp_lkm_kunta.px"
+  (let [apiurl "https://pxdata.stat.fi:443/PXWeb/api/v1/fi/Toimipaikkalaskuri/Toimipaikkalaskuri/tmp_lkm_kunta.px"
         api-input {:query [{:code "Kunta"
                             :selection {:filter "all"
                                         :values ["*"]}}
