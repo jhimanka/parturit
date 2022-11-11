@@ -22,7 +22,7 @@
   (peek (re-find #"^\d+ +(.+)$" rawname)))
 
 (defn get-populations []
-  (let [apiurl "https://pxnet2.stat.fi:443/PXWeb/api/v1/fi/Kuntien_avainluvut/2021/kuntien_avainluvut_2021_viimeisin.px"
+  (let [apiurl "https://pxdata.stat.fi:443/PXWeb/api/v1/fi/Kuntien_avainluvut/2021/kuntien_avainluvut_2021_viimeisin.px"
         api-input {:query [{:code "Alue 2021"
                             :selection {:filter "all"
                                         :values ["*"]}}
@@ -43,7 +43,7 @@
 ;; Then we fetch the number of hairdressers per municipality
 
 (defn get-barbers-kunnat []
-  (let [apiurl "https://pxnet2.stat.fi:443/PXWeb/api/v1/fi/Toimipaikkalaskuri/Toimipaikkalaskuri/tmp_lkm_kunta.px"
+  (let [apiurl "https://pxdata.stat.fi:443/PXWeb/api/v1/fi/Toimipaikkalaskuri/Toimipaikkalaskuri/tmp_lkm_kunta.px"
         api-input {:query [{:code "Kunta"
                             :selection {:filter "all"
                                         :values ["*"]}}
@@ -79,7 +79,7 @@
                   (sort-by :proportion)
                   (take 10)))
 
-;; And the ten municipalities that are most deprived of haute couture
+;; And the ten municipalities that are most deprived of haute coiffure
 (clerk/table (->> barbers
                   (sort-by :proportion)
                   (take-last 10)))
