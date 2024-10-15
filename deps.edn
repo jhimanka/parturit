@@ -1,8 +1,8 @@
 {:paths ["src" "resources"]
- :deps {org.clojure/clojure {:mvn/version "1.11.1"}
-        io.github.nextjournal/clerk {:mvn/version "0.11.603"}
-        clj-http/clj-http {:mvn/version "3.12.3"}
-        metosin/jsonista {:mvn/version "0.3.6"}}
+ :deps {org.clojure/clojure {:mvn/version "1.12.0"}
+        io.github.nextjournal/clerk {:mvn/version "0.16.1016"}
+        clj-http/clj-http {:mvn/version "3.13.0"}
+        metosin/jsonista {:mvn/version "0.3.11"}}
  :aliases
  {:nextjournal/clerk
   {:extra-paths ["datasets"]
