@@ -29,6 +29,4 @@
 
   ;; produce a static app
   (clerk/build-static-app! {:paths (mapv #(str "notebooks/" % ".clj")
-                                         '[parturit barbers])})
-
-  )
+                                         '[parturit barbers])}))

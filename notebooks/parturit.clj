@@ -72,8 +72,8 @@
 
 ;; Kymmenen kärki parturikampaamojen määrässä kuntalaista kohti
 (clerk/table (->> parturit
-               (sort-by :suhde)
-               (take 10)))
+                  (sort-by :suhde)
+                  (take 10)))
 
 ;; Ja 10 kuntaa joissa asiat ovat huonoiten
 (clerk/table (->> parturit
