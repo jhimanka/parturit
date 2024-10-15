@@ -39,16 +39,16 @@
 ;; Sitten haemme parturikampaamojen määrän kunnittain
 
 (defn get-parturit-kunnat []
-  (let [apiurl "https://pxdata.stat.fi:443/PXWeb/api/v1/fi/Toimipaikkalaskuri/Toimipaikkalaskuri/tmp_lkm_kunta.px"
+  (let [apiurl "https://pxdata.stat.fi:443/PxWeb/api/v1/fi/Toimipaikkalaskuri/Toimipaikkalaskuri/tplask_toimipaikkalaskuri_pxt_14if_fi.px"
         api-input {:query [{:code "Kunta"
                             :selection {:filter "all"
                                         :values ["*"]}}
-                           {:code "Toimiala2008"
+                           {:code "Toimiala"
                             :selection {:filter "item"
-                                        :values ["96021"]}}
+                                        :values ["S96021"]}}
                            {:code "Henkilöstön suuruusluokka"
                             :selection {:filter "item"
-                                        :values ["_19"]}}]
+                                        :values ["SSS"]}}]
                    :response {:format "json-stat2"}}
         input2 (json/write-value-as-string api-input)
         result (client/post apiurl {:body input2})
@@ -72,8 +72,8 @@
 
 ;; Kymmenen kärki parturikampaamojen määrässä kuntalaista kohti
 (clerk/table (->> parturit
-                  (sort-by :suhde)
-                  (take 10)))
+               (sort-by :suhde)
+               (take 10)))
 
 ;; Ja 10 kuntaa joissa asiat ovat huonoiten
 (clerk/table (->> parturit
