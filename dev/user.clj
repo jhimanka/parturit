@@ -2,6 +2,11 @@
   (:require [nextjournal.clerk :as clerk]))
 
 (comment
+  ;; Add tap sink. Assumes we are using a rich REPL like the Practicalli one that includes portal
+  (require '[portal.api :as portal])
+  (portal/open)
+  (portal/tap)
+
   ;; start without file watcher, open browser when started
   (clerk/serve! {:browse? true})
 
