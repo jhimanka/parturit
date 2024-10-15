@@ -19,8 +19,8 @@
 (def populations (atom {}))
 
 (defn get-populations []
-  (let [apiurl "https://pxdata.stat.fi:443/PXWeb/api/v1/fi/Kuntien_avainluvut/2021/kuntien_avainluvut_2021_viimeisin.px"
-        api-input {:query [{:code "Alue 2021"
+  (let [apiurl "https://pxdata.stat.fi:443/PxWeb/api/v1/fi/Kuntien_avainluvut/uusin/kuntien_avainluvut_viimeisin.px"
+        api-input {:query [{:code "Alue"
                             :selection {:filter "all"
                                         :values ["*"]}}
                            {:code "Tiedot"
@@ -29,8 +29,8 @@
                    :response {:format "json-stat2"}}
         result (client/post apiurl {:body (json/write-value-as-string api-input)})
         result-edn (json/read-value  (:body result) json/keyword-keys-object-mapper)
-        indexes (get-in result-edn [:dimension (keyword "Alue 2021") :category :index])
-        labels (get-in result-edn [:dimension (keyword "Alue 2021") :category :label])
+        indexes (get-in result-edn [:dimension (keyword "Alue") :category :index])
+        labels (get-in result-edn [:dimension (keyword "Alue") :category :label])
         value (:value result-edn)]
     (doseq [municipality labels]
       (swap! populations assoc (val municipality) (get value (get indexes (key municipality)))))))

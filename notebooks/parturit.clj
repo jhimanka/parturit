@@ -18,18 +18,18 @@
 (def vakiluvut (atom {}))
 
 (defn get-vakiluvut []
-  (let [apiurl "https://pxdata.stat.fi:443/PXWeb/api/v1/fi/Kuntien_avainluvut/2021/kuntien_avainluvut_2021_viimeisin.px"
-        api-input {:query [{:code "Alue 2021"
+  (let [apiurl "https://pxdata.stat.fi:443/PxWeb/api/v1/fi/Kuntien_avainluvut/uusin/kuntien_avainluvut_viimeisin.px"
+        api-input {:query [{:code "Alue"
                             :selection {:filter "all"
                                         :values ["*"]}}
                            {:code "Tiedot"
                             :selection {:filter "item"
                                         :values ["M411"]}}]
                    :response {:format "json-stat2"}}
-        result (client/post apiurl {:body (json/write-value-as-string api-input)})
+        result (client/post apiurl {:throw-entire-message? true :body (json/write-value-as-string api-input)})
         result-edn (json/read-value  (:body result) json/keyword-keys-object-mapper)
-        indeksit (get-in result-edn [:dimension (keyword "Alue 2021") :category :index])
-        labels (get-in result-edn [:dimension (keyword "Alue 2021") :category :label])
+        indeksit (get-in result-edn [:dimension (keyword "Alue") :category :index])
+        labels (get-in result-edn [:dimension (keyword "Alue") :category :label])
         value (:value result-edn)]
     (doseq [kunta labels]
       (swap! vakiluvut assoc (val kunta) (get value (get indeksit (key kunta)))))))
