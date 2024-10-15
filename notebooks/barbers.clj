@@ -18,9 +18,6 @@
 
 (def populations (atom {}))
 
-(defn prettyname [rawname]
-  (peek (re-find #"^\d+ +(.+)$" rawname)))
-
 (defn get-populations []
   (let [apiurl "https://pxdata.stat.fi:443/PXWeb/api/v1/fi/Kuntien_avainluvut/2021/kuntien_avainluvut_2021_viimeisin.px"
         api-input {:query [{:code "Alue 2021"
@@ -61,7 +58,7 @@
         labels (get-in result-edn [:dimension :Kunta :category :label])
         value (:value result-edn)]
     (for [municipality labels
-          :let [bettername (prettyname (val municipality))
+          :let [bettername (val municipality)
                 barbers (get value (get indeksit (key municipality)) 0)
                 population  (get @populations bettername 0)]
           :when (and (string? bettername) (pos-int? barbers) (pos-int? population))]

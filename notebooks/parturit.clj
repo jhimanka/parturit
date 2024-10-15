@@ -17,9 +17,6 @@
 
 (def vakiluvut (atom {}))
 
-(defn prettyname [rawname]
-  (peek (re-find #"^\d+ +(.+)$" rawname)))
-
 (defn get-vakiluvut []
   (let [apiurl "https://pxdata.stat.fi:443/PXWeb/api/v1/fi/Kuntien_avainluvut/2021/kuntien_avainluvut_2021_viimeisin.px"
         api-input {:query [{:code "Alue 2021"
@@ -60,7 +57,7 @@
         labels (get-in result-edn [:dimension :Kunta :category :label])
         value (:value result-edn)]
     (for [kunta labels
-          :let [bettername (prettyname (val kunta))
+          :let [bettername  (val kunta)
                 parturit (get value (get indeksit (key kunta)) 0)
                 vakiluku  (get @vakiluvut bettername 0)]
           :when (and (string? bettername) (pos-int? parturit) (pos-int? vakiluku))]
